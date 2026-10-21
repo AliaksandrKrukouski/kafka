@@ -1,16 +1,38 @@
 import random
-from confluent_kafka import Producer
+from confluent_kafka import Consumer
 
 if __name__ == '__main__':
-    print("Kafka Producer")
+    print("Kafka Consumer")
 
-    config = {'bootstrap.servers': 'localhost:9092'}
+    topic = 'test_topic'
+    group_id = 'test_group'
 
-    producer = Producer(config)
+    config = {'bootstrap.servers': 'localhost:9092',
+              'group.id': group_id,
+              'auto.offset.reset': 'earliest'}
 
-    topic, value = 'test_topic', f'test_value_{random.randint(0, 1000)}'
+    consumer = Consumer(config)
+    consumer.subscribe([topic])
 
-    print(f"Producing message to topic: {topic}; value: {value}")
-    producer.produce(topic, value)
+    print(f"Consuming messages from topic: {topic}")
+    try:
+        msg_number = 1
+        while True:
+            msg = consumer.poll(1)
 
-    producer.flush()
+            if msg is None:
+                print("No messages")
+            elif msg.error():
+                print(f"Consumer error: {msg.error()}")
+            else:
+                print(f"Consumed message #{msg_number}: \n"
+                      f"- topic: {msg.topic()} \n"
+                      f"- value: {msg.value()} \n"
+                      f"- partition: {msg.partition()} \n"
+                      f"- offset: {msg.offset()}")
+                msg_number += 1
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        consumer.close()

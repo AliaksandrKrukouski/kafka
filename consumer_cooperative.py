@@ -2,10 +2,10 @@ import random
 from confluent_kafka import Consumer
 
 if __name__ == '__main__':
-    print("Kafka Consumer")
+    print("Kafka Consumer Cooperative")
 
     topic = 'test_topic'
-    group_id = 'test_group'
+    group_id = 'test_group_coop'
 
     config = {'bootstrap.servers': 'localhost:9092',
               'group.id': group_id,
